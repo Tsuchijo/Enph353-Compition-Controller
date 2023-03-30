@@ -11,13 +11,37 @@ from std_msgs.msg import String
 #create cv2 bridge 
 bridge = CvBridge()
 
+# Display image in a window called "camera_image.jpeg"
+cv2.namedWindow('camera_image.jpeg', cv2.WINDOW_NORMAL)
+
+#create sliders to test values
+cv2.createTrackbar('Saturation', 'camera_image.jpeg', 0, 100, lambda x: None)
+cv2.createTrackbar('Masking', 'camera_image.jpeg', 0, 255, lambda x: None)
+
 
 ##Image callback
 def image_callback(msg):
+
     # Convert your ROS Image message to OpenCV2
     cv2_img = bridge.imgmsg_to_cv2(msg, "bgr8")
-    # Save your OpenCV2 image as a jpeg 
-    cv2.imshow('camera_image.jpeg', cv2_img)
+
+    # Get the current slider values
+    sat = cv2.getTrackbarPos('Saturation', 'camera_image.jpeg') / 100
+    mask = cv2.getTrackbarPos('Masking', 'camera_image.jpeg')
+
+    # Convert the image to HSV and adjust the saturation
+    hsv = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2HSV)
+    hsv[..., 1] = hsv[..., 1] * sat
+    img_sat = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+
+    # Apply a mask to the image
+    mask_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2GRAY)
+    _, mask_img = cv2.threshold(mask_img, mask, 255, cv2.THRESH_BINARY)
+    img_masked = cv2.bitwise_and(img_sat, img_sat, mask=mask_img)
+
+    # Display image in a window called "camera_image.jpeg"
+    cv2.imshow('win2', cv2_img)
+
     #wait key
     cv2.waitKey(1)
 
