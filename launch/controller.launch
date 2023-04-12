@@ -1,3 +1,4 @@
 <launch>
     <node pkg="my_controller" type="move_robot.py" name="move_robot" output="screen"/>
+    <!-- <node pkg="video_aqusition-main" type="license_plate_reader.py" name="license_plate_reader" output="screen" /> -->
 </launch>

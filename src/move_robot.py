@@ -28,9 +28,7 @@ avg_x = 0
 # state 1: line follow off vertical lines until it sees a horizontal line or the lines point away from eachother
 # state 2: decision making state for if it sees a horizontal line, if the line is in the center then it is a left turn or pedestrian
 # if the line is to the right or left it is a car, if the lines are to the left and right but not center it is an intersection
-# state 3: if it sees a car on the left then it will move forward piding from the line on the right for a set amount of time and then go back to state 1
 # state 4: if it sees a left turn then it will turn left until it no longer sees a horizontal line then go back to state 1
-# state 5: if it sees an intersection it will go forward until it sees a horizontal line then go back to state 2
 # state 6: if it sees the lines pointing away from eachother then it will turn left until it sees a horizontal line then go back to state 1
 # state 7: if it sees a pedestrian then it will stop and wait for the pedestrian to cross then go back to state 1
 
@@ -65,32 +63,17 @@ def state_machine():
     if state == 2:
         if see_crosswalk == True:
             state = 7
-        if see_car == True:
-            state = 3
         if avg_line_x > 300 and avg_line_x < 1000:
             state = 4
         else: 
-            state = 1
-    # if it sees a car
-    if state == 3:
-        move_robot(speed, 0)
-        rospy.sleep(0.5)
-        if horizontal_line == False:
             state = 1
     # if it sees a left turn
     if state == 4:
         move_robot(0.05, 1)
         if horizontal_line == False:
             state = 1
-        if see_car == True:
-            state = 3
         if see_crosswalk == True:
             state = 7
-    # if it sees an intersection
-    if state == 5:
-        move_robot(speed, 0)
-        rospy.sleep(1)
-        state = 6
     # if it sees the lines pointing away from eachother
     if state == 6:
         move_robot(speed,  - (nudge_speed * (avg_x > 640)) + (nudge_speed * (avg_x < 640)))
@@ -276,8 +259,6 @@ def image_callback(msg):
         avg_x = 640
     # Display image in a window called "win3"d
     cv2.imshow('win3', im_dst)
-    cv2.imshow('win2', cv2_img)
-    cv2.imshow('win1', gray)
     cv2.waitKey(1)
 
 ##threshold function for finding cars
